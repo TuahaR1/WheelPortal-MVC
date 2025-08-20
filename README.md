@@ -1,10 +1,3 @@
-Got it 👍 You want a **`README.md`** that documents your MVC project structure with directories like `Portal`, `Data`, `Model`, `ViewModel`, `Controller`, etc.
-
-Here’s a clean and professional **`README.md`** you can use:
-
----
-
-```markdown
 # 🎡 Wheel Portal (ASP.NET Core MVC)
 
 This project is an **ASP.NET Core MVC portal** with support for API endpoints, entity management, and dynamic UI rendering.  
@@ -14,7 +7,7 @@ It follows a clean **MVC architecture** with a structured folder organization.
 
 ## 📂 Project Structure
 
-```
+
 
 MVC/
 └── Portal/
