@@ -1,7 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy some changes";
 }
-
+@using Newtonsoft.Json
+@using Portal.ViewModel
+@model IEnumerable<WheelSectionDto>
 
 <style>
     @@font-face {
@@ -189,8 +191,14 @@
         }
         const debouncedDrawWheel = debounce(drawWheel, 50);
 
-        let DropDownData = [];
-        let wheelData = [];
+         // Initialize wheelData and DropDownData from Model
+         let wheelData = @Html.Raw(JsonConvert.SerializeObject(Model));
+         let DropDownData = @Html.Raw(JsonConvert.SerializeObject(Model.Where(s => s.FkParentWheelId == null).Select(s => new { s.PkWheelId, s.Name })));
+         $('#loading').hide();
+
+         console.log("WheelData",wheelData);
+          console.log("DropDownData",DropDownData);
+          
         let colors = [
             "#FBA969", "#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF",
             "#A66DD4", "#FF924C", "#FF5DA2", "#00C2A8", "#FFD166",
@@ -361,35 +369,35 @@
             setTimeout(() => toastContainer.remove(), 3000);
         }
         function populateEditModal(item) {
-            $('#editId').val(item.pkWheelId || '');
-            $('#editName').val(item.name);
-            $('#editColour').val(item.colour);
-            $('#editOrder').val(item.order || '');
+            $('#editId').val(item.PkWheelId || '');
+            $('#editName').val(item.Name);
+            $('#editColour').val(item.Colour);
+            $('#editOrder').val(item.Order || '');
             $('#editParent').empty();
             $('#editParent').append('<option value="">-- Top-level Section --</option>');
             DropDownData.forEach((s, i) => {
-                if (s.pkWheelId !== item.pkWheelId) {
-                    $('#editParent').append(`<option value="${s.pkWheelId}">${s.name}</option>`);
+                if (s.PkWheelId !== item.PkWheelId) {
+                    $('#editParent').append(`<option value="${s.PkWheelId}">${s.Name}</option>`);
                 }
             });
-            if (item.fkParentWheelId) {
-                $('#editParent').val(item.fkParentWheelId);
+            if (item.FkParentWheelId) {
+                $('#editParent').val(item.FkParentWheelId);
             }
             console.log('Opening edit modal for item:', item);
             modal.show();
         }
 
         function updateDropDownData() {
-            DropDownData = JSON.parse(JSON.stringify(wheelData.filter(s => !s.fkParentWheelId)));
+            DropDownData = JSON.parse(JSON.stringify(wheelData.filter(s => !s.FkParentWheelId)));
         }
 
         function findSegmentIndexById(id) {
             for (let i = 0; i < wheelData.length; i++) {
-                if (wheelData[i].pkWheelId === id) return i;
+                if (wheelData[i].PkWheelId === id) return i;
                 for (let j = 0; j < wheelData[i].children.length; j++) {
-                    if (wheelData[i].children[j].pkWheelId === id) return [i, j];
+                    if (wheelData[i].children[j].PkWheelId === id) return [i, j];
                     for (let k = 0; k < wheelData[i].children[j].children.length; k++) {
-                        if (wheelData[i].children[j].children[k].pkWheelId === id) return [i, j, k];
+                        if (wheelData[i].children[j].children[k].PkWheelId === id) return [i, j, k];
                     }
                 }
             }
@@ -420,8 +428,8 @@
                         $editParent.empty().append('<option value="">-- Top-level Section --</option>');
                         $newParent.empty().append('<option value="">-- Top-level Section --</option>');
                         DropDownData.forEach(section => {
-                            $editParent.append(`<option value="${section.pkWheelId}">${section.name}</option>`);
-                            $newParent.append(`<option value="${section.pkWheelId}">${section.name} (ID: ${section.pkWheelId})</option>`);
+                            $editParent.append(`<option value="${section.PkWheelId}">${section.Name}</option>`);
+                            $newParent.append(`<option value="${section.PkWheelId}">${section.Name} (ID: ${section.PkWheelId})</option>`);
                         });
                         if (editVal) $editParent.val(editVal);
                         if (newVal) $newParent.val(newVal);
@@ -443,7 +451,7 @@
             });
         }
 
-        function drawWheel() {
+           function drawWheel() {
             const segments = wheelData.length;
             const svg = document.querySelector('#chartContainer svg') || document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute('width', canvas.width);
@@ -472,7 +480,7 @@
                             A ${maxRadius} ${maxRadius} 0 0 0 ${centerX + maxRadius * Math.cos(startAngle)} ${centerY + maxRadius * Math.sin(startAngle)}
                             Z
                         `);
-                path.setAttribute('fill', wheelData[i].colour);
+                path.setAttribute('fill', wheelData[i].Colour);
                 path.setAttribute('class', 'segment');
                 path.setAttribute('data-segment-index', i);
 
@@ -486,7 +494,7 @@
                         } else {
                             if (selectedSegment !== i || !isSubBoxesActive) {
                                 selectedSegment = i;
-                                isSubBoxesActive = wheelData[i].children.length > 0;
+                                isSubBoxesActive = wheelData[i].Children.length > 0;
                                 isGrandBoxesActive = false;
                                 selectedSubSegment = isSubBoxesActive ? 0 : null;
                                 hoveredSubSegment = null;
@@ -558,8 +566,8 @@
                 text.setAttribute('font-size', segmentFontSize);
                 text.setAttribute('fill', '#000');
                 text.setAttribute('role', 'button');
-                text.setAttribute('aria-label', `Edit ${wheelData[i].name}`);
-                text.textContent = wheelData[i].name;
+                text.setAttribute('aria-label', `Edit ${wheelData[i].Name}`);
+                text.textContent = wheelData[i].Name;
 
                 if (i === selectedSegment && isSubBoxesActive) {
                     const offsetDistance = 10;
@@ -591,7 +599,7 @@
                     pencilGroup.setAttribute('class', 'pencil-icon');
                     pencilGroup.setAttribute('tabindex', '0');
                     pencilGroup.setAttribute('role', 'button');
-                    pencilGroup.setAttribute('aria-label', `Edit ${wheelData[i].name}`);
+                    pencilGroup.setAttribute('aria-label', `Edit ${wheelData[i].Name}`);
                     pencilGroup.addEventListener('click', () => {
                         populateEditModal(wheelData[i]);
                     });
@@ -611,12 +619,12 @@
                     addGroup.setAttribute('role', 'button');
                     addGroup.setAttribute('tabindex', '0');
 
-                    addGroup.setAttribute('aria-label', `Add segment after ${wheelData[i].name}`);
+                    addGroup.setAttribute('aria-label', `Add segment after ${wheelData[i].Name}`);
                     addGroup.addEventListener("click", () => {
                         openAddModal(wheelData[i]);
                     })
                     // Add icon for adding child segment (only for active or hovered segment)
-                    if ((i === selectedSegment || i === hoveredSegment) && wheelData[selectedSegment].children.length <= 0) {
+                    if ((i === selectedSegment || i === hoveredSegment) && wheelData[selectedSegment].Children.length <= 0) {
                         const childX = centerX + (maxRadius + 30) * Math.cos(midAngle);
                         const childY = centerY + (maxRadius + 30) * Math.sin(midAngle);
                         const childAddGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -628,7 +636,7 @@
                         childAddGroup.setAttribute('class', 'add-child-icon');
                         childAddGroup.setAttribute('data-segment-index', i);
                         childAddGroup.setAttribute('role', 'button');
-                        childAddGroup.setAttribute('aria-label', `Add child to ${wheelData[i].name}`);
+                        childAddGroup.setAttribute('aria-label', `Add child to ${wheelData[i].Name}`);
                         childAddGroup.setAttribute('tabindex', '0');
 
                         childAddGroup.addEventListener("click", () => {
@@ -666,7 +674,7 @@
             const angle = segments > 0 ? (2 * Math.PI) / segments : 0;
 
             if (isSubBoxesActive && selectedSegment !== null) {
-                const subSegments = wheelData[selectedSegment].children.length;
+                const subSegments = wheelData[selectedSegment].Children.length;
                 if (subSegments > 0) {
                     const segmentAngle = selectedSegment * angle + angle / 2;
                     const subAngle = subSegments > 1 ? (angle * 0.5 + subGap * (subSegments - 1)) / (subSegments - 1) : angle * 0.8;
@@ -686,10 +694,10 @@
                         subAddGroupBefore.appendChild(subAddPathElemBefore);
                         subAddGroupBefore.setAttribute('class', 'add-icon');
                         subAddGroupBefore.setAttribute('role', 'button');
-                        subAddGroupBefore.setAttribute('aria-label', `Add sub-segment after last sub-segment of ${wheelData[selectedSegment].name}`);
+                        subAddGroupBefore.setAttribute('aria-label', `Add sub-segment after last sub-segment of ${wheelData[selectedSegment].Name}`);
                         subAddGroupBefore.setAttribute('tabindex', '0');
                         subAddGroupBefore.addEventListener('click', () => {
-                            openAddModal(wheelData[selectedSegment].children[0]);
+                            openAddModal(wheelData[selectedSegment].Children[0]);
 
                         });
                         svg.appendChild(subAddGroupBefore);
@@ -710,7 +718,7 @@
                         //  ctx.rect(-scaledSubSize / 2, -scaledSubSize / 2, scaledSubSize, scaledSubSize);
                         ctx.arc(0, 0, SubCircleRadius, 0, 2 * Math.PI);
 
-                        ctx.fillStyle = isHoveredSub ? adjustColor(wheelData[selectedSegment].children[i].colour, 0.3) : (isSelectedSub ? adjustColor(wheelData[selectedSegment].children[i].colour, 0.2) : wheelData[selectedSegment].children[i].colour);
+                        ctx.fillStyle = isHoveredSub ? adjustColor(wheelData[selectedSegment].Children[i].Colour, 0.3) : (isSelectedSub ? adjustColor(wheelData[selectedSegment].Children[i].Colour, 0.2) : wheelData[selectedSegment].Children[i].Colour);
                         if (isSelectedSub) {
                             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
                             ctx.shadowBlur = 10 / zoomLevel;
@@ -723,11 +731,11 @@
                         ctx.save();
                         ctx.translate(boxX, boxY);
                         ctx.fillStyle = '#000';
-                        const subBoxFontSize = wheelData[selectedSegment].children[i].name.length > 5 ? 8 : 10;
+                        const subBoxFontSize = wheelData[selectedSegment].Children[i].Name.length > 5 ? 8 : 10;
                         ctx.font = `${subBoxFontSize * zoomLevel}px Gotham, sans-serif`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        const lines = wrapText(wheelData[selectedSegment].children[i].name, SubCircleRadius, subBoxFontSize);
+                        const lines = wrapText(wheelData[selectedSegment].Children[i].Name, SubCircleRadius, subBoxFontSize);
                         lines.forEach((line, index) => {
                             ctx.fillText(line, 0, (index - (lines.length - 1) / 2) * 18);
                         });
@@ -750,17 +758,17 @@
                                 subAddGroup.appendChild(subAddPathElem);
                                 subAddGroup.setAttribute('class', 'add-icon');
                                 subAddGroup.setAttribute('role', 'button');
-                                subAddGroup.setAttribute('aria-label', `Add sub-segment after ${wheelData[selectedSegment].children[i].name}`);
+                                subAddGroup.setAttribute('aria-label', `Add sub-segment after ${wheelData[selectedSegment].Children[i].Name}`);
                                 subAddGroup.setAttribute('tabindex', '0');
                                 subAddGroup.addEventListener('click', () => {
 
-                                    openAddModal(wheelData[selectedSegment].children[i]);
+                                    openAddModal(wheelData[selectedSegment].Children[i]);
                                 });
                                 svg.appendChild(subAddGroup);
                             }
 
                             // Add icon for adding child to sub-segment (only if hovered or selected)
-                            if ((isHoveredSub || isSelectedSub) && wheelData[selectedSegment].children[i].children.length <= 0) {
+                            if ((isHoveredSub || isSelectedSub) && wheelData[selectedSegment].Children[i].Children.length <= 0) {
                                 const isLeftSide = boxX < centerX;
                                 const offset = isLeftSide ? 15 : 30; // Distance from circle edge
                                 const iconAngle = boxAngle;
@@ -775,10 +783,10 @@
                                 subChildAddGroup.appendChild(subChildPathElem);
                                 subChildAddGroup.setAttribute('class', 'add-child-icon');
                                 subChildAddGroup.setAttribute('role', 'button');
-                                subChildAddGroup.setAttribute('aria-label', `Add child to ${wheelData[selectedSegment].children[i].name}`);
+                                subChildAddGroup.setAttribute('aria-label', `Add child to ${wheelData[selectedSegment].Children[i].Name}`);
                                 subChildAddGroup.setAttribute('tabindex', '0');
                                 subChildAddGroup.addEventListener('click', () => {
-                                    openAddSegmentChildModal(wheelData[selectedSegment].children[i]);
+                                    openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
                                 });
                                 svg.appendChild(subChildAddGroup);
                             }
@@ -794,20 +802,20 @@
                             subPencilGroup.appendChild(subPencilPathElem);
                             subPencilGroup.setAttribute('class', 'pencil-icon');
                             subPencilGroup.setAttribute('role', 'button');
-                            subPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].children[i].name}`);
+                            subPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].Children[i].Name}`);
                             subPencilGroup.setAttribute('tabindex', '0');
-                            subPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].children[i]));
+                            subPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].Children[i]));
                             subPencilGroup.addEventListener('keydown', (event) => {
                                 if (event.key === 'Enter' || event.key === ' ') {
-                                    populateEditModal(wheelData[selectedSegment].children[i]);
+                                    populateEditModal(wheelData[selectedSegment].Children[i]);
                                 }
                             });
                             svg.appendChild(subPencilGroup);
                         }
 
-                        if ((isGrandBoxesActive && i === selectedSubSegment && wheelData[selectedSegment].children[i].children.length > 0) ||
-                            (i === hoveredSubSegment && wheelData[selectedSegment].children[i].children.length > 0)) {
-                            const grandSegments = wheelData[selectedSegment].children[i].children.length;
+                        if ((isGrandBoxesActive && i === selectedSubSegment && wheelData[selectedSegment].Children[i].Children.length > 0) ||
+                            (i === hoveredSubSegment && wheelData[selectedSegment].Children[i].Children.length > 0)) {
+                            const grandSegments = wheelData[selectedSegment].Children[i].Children.length;
                             const subBoxAngle = subStartAngle + (subSegments > 1 ? i * subAngle : 0);
                             const minAngularGap = Math.asin((grandCircleRadius * 1.2) / grandArcRadius);
                             const grandAngle = grandSegments > 1 ? Math.max((subAngle * 0.6 + grandGap * (grandSegments - 1)) / (grandSegments - 1), minAngularGap) : Math.max(subAngle * 0.2 + grandGap);
@@ -827,10 +835,10 @@
                                 grandAddGroupBefore.appendChild(grandAddPathElemBefore);
                                 grandAddGroupBefore.setAttribute('class', 'add-icon');
                                 grandAddGroupBefore.setAttribute('role', 'button');
-                                grandAddGroupBefore.setAttribute('aria-label', `Add grand-segment before first grand-segment of ${wheelData[selectedSegment].children[i].name}`);
+                                grandAddGroupBefore.setAttribute('aria-label', `Add grand-segment before first grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
                                 grandAddGroupBefore.setAttribute('tabindex', '0');
                                 grandAddGroupBefore.addEventListener('click', () => {
-                                    openAddSegmentChildModal(wheelData[selectedSegment].children[i]);
+                                    openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
 
                                 });
                                 svg.appendChild(grandAddGroupBefore);
@@ -847,20 +855,20 @@
                                 // ctx.rect(-grandSquareSize / 2, -grandSquareSize / 2, grandSquareSize, grandSquareSize); // don't remove these line
                                 ctx.arc(0, 0, grandCircleRadius, 0, 2 * Math.PI);
                                 ctx.fillStyle = j === hoveredGrandSegment && i === (editMode ? selectedSubSegment : hoveredSubSegment) ?
-                                    adjustColor(wheelData[selectedSegment].children[i].children[j].colour, 0.3) :
-                                    wheelData[selectedSegment].children[i].children[j].colour;
+                                    adjustColor(wheelData[selectedSegment].Children[i].Children[j].Colour, 0.3) :
+                                    wheelData[selectedSegment].Children[i].Children[j].Colour;
                                 ctx.fill();
                                 ctx.restore();
 
                                 ctx.save();
                                 ctx.translate(grandBoxX, grandBoxY);
                                 ctx.fillStyle = '#000';
-                                const grandBoxFontSize = wheelData[selectedSegment].children[i].children[j].name.length > 4 ? 8 : 10;
+                                const grandBoxFontSize = wheelData[selectedSegment].Children[i].Children[j].Name.length > 4 ? 8 : 10;
                                 ctx.font = `${grandBoxFontSize * zoomLevel}px Gotham, sans-serif`;
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
 
-                                const lines = wrapText(wheelData[selectedSegment].children[i].children[j].name, grandCircleRadius, grandBoxFontSize);
+                                const lines = wrapText(wheelData[selectedSegment].Children[i].Children[j].Name, grandCircleRadius, grandBoxFontSize);
                                 lines.forEach((line, index) => {
                                     ctx.fillText(line, 0, (index - (lines.length - 1) / 2) * 16);
                                 });
@@ -880,10 +888,10 @@
                                     grandAddGroup.appendChild(grandAddPathElem);
                                     grandAddGroup.setAttribute('class', 'add-icon');
                                     grandAddGroup.setAttribute('role', 'button');
-                                    grandAddGroup.setAttribute('aria-label', `Add grand-segment after ${wheelData[selectedSegment].children[i].children[j].name}`);
+                                    grandAddGroup.setAttribute('aria-label', `Add grand-segment after ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
                                     grandAddGroup.setAttribute('tabindex', '0');
                                     grandAddGroup.addEventListener('click', () => {
-                                        openAddModal(wheelData[selectedSegment].children[i].children[j]);
+                                        openAddModal(wheelData[selectedSegment].Children[i].Children[j]);
                                     });
                                     svg.appendChild(grandAddGroup);
                                 }
@@ -899,12 +907,12 @@
                                     grandPencilGroup.appendChild(grandPencilPathElem);
                                     grandPencilGroup.setAttribute('class', 'pencil-icon');
                                     grandPencilGroup.setAttribute('role', 'button');
-                                    grandPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].children[i].children[j].name}`);
+                                    grandPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
                                     grandPencilGroup.setAttribute('tabindex', '0');
-                                    grandPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].children[i].children[j]));
+                                    grandPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].Children[i].Children[j]));
                                     grandPencilGroup.addEventListener('keydown', (event) => {
                                         if (event.key === 'Enter' || event.key === ' ') {
-                                            populateEditModal(wheelData[selectedSegment].children[i].children[j]);
+                                            populateEditModal(wheelData[selectedSegment].Children[i].Children[j]);
                                         }
                                     });
                                     svg.appendChild(grandPencilGroup);
@@ -921,15 +929,15 @@
                                     grandAddGroupAfter.appendChild(grandAddPathElemAfter);
                                     grandAddGroupAfter.setAttribute('class', 'add-icon');
                                     grandAddGroupAfter.setAttribute('role', 'button');
-                                    grandAddGroupAfter.setAttribute('aria-label', `Add grand-segment after last grand-segment of ${wheelData[selectedSegment].children[i].name}`);
+                                    grandAddGroupAfter.setAttribute('aria-label', `Add grand-segment after last grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
                                     grandAddGroupAfter.setAttribute('tabindex', '0');
                                     grandAddGroupAfter.addEventListener('click', () => {
-                                        openAddModal(wheelData[selectedSegment].children[i].children[j]);
+                                        openAddModal(wheelData[selectedSegment].Children[i].Children[j]);
 
                                     });
                                     grandAddGroupAfter.addEventListener('keydown', (event) => {
                                         if (event.key === 'Enter' || event.key === ' ') {
-                                            openAddModal(wheelData[selectedSegment].children[i].children[j]);
+                                            openAddModal(wheelData[selectedSegment].Children[i].Children[j]);
 
                                         }
                                     });
@@ -939,7 +947,7 @@
                             }
 
 
-                            if (editMode && wheelData[selectedSegment].children[i].children.length < 14) {
+                            if (editMode && wheelData[selectedSegment].Children[i].Children.length < 14) {
                                 // Add plus icon after the last grand-segment
                                 const afterLastGrandAngle = grandStartAngle + totalGrandAngle + (grandSegments > 0 ? grandAngle / 2 : 0);
                                 const afterGrandPlusX = centerX + grandArcRadius * Math.cos(afterLastGrandAngle);
@@ -952,7 +960,7 @@
                                 grandAddGroupAfter.appendChild(grandAddPathElemAfter);
                                 grandAddGroupAfter.setAttribute('class', 'add-icon');
                                 grandAddGroupAfter.addEventListener('click', () => {
-                                    openAddSegmentChildModal(wheelData[selectedSegment].children[i]);
+                                    openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
 
                                 });
                                 svg.appendChild(grandAddGroupAfter);
@@ -962,7 +970,7 @@
                     }
 
                     // Add plus icon after the last sub-segment
-                    if (editMode && wheelData[selectedSegment].children.length < 14) {
+                    if (editMode && wheelData[selectedSegment].Children.length < 14) {
 
                         const afterLastSubAngle = subStartAngle + (subSegments > 1 ? (subSegments - 1) * subAngle : 0) + (subSegments > 0 ? subAngle / 2 : 0);
                         const afterSubPlusX = centerX + subArcRadius * Math.cos(afterLastSubAngle);
@@ -975,7 +983,7 @@
                         subAddGroupAfter.appendChild(subAddPathElemAfter);
                         subAddGroupAfter.setAttribute('class', 'add-icon');
                         subAddGroupAfter.addEventListener('click', () => {
-                            openAddModal(wheelData[selectedSegment].children[wheelData[selectedSegment].children.length - 1]);
+                            openAddModal(wheelData[selectedSegment].Children[wheelData[selectedSegment].Children.length - 1]);
 
                         });
                         svg.appendChild(subAddGroupAfter);
@@ -1055,7 +1063,7 @@
             }
 
             if (isSubBoxesActive && selectedSegment !== null) {
-                const subSegments = wheelData[selectedSegment].children.length;
+                const subSegments = wheelData[selectedSegment].Children.length;
                 if (subSegments > 0) {
                     const segmentAngle = selectedSegment * angle + angle / 2;
                     const subAngle = subSegments > 1 ? (angle * 0.5 + subGap * (subSegments - 1)) / (subSegments - 1) : 0;
@@ -1077,7 +1085,7 @@
                                 hoveredGrandSegment = null;
                                 if (editMode) {
                                     selectedSubSegment = i;
-                                    isGrandBoxesActive = wheelData[selectedSegment].children[i].children.length > 0;
+                                    isGrandBoxesActive = wheelData[selectedSegment].Children[i].Children.length > 0;
                                     updateCanvasHeight();
                                 }
                                 hoverChanged = true;
@@ -1090,9 +1098,9 @@
                     if (!subBoxHovered && isSubBoxesActive) {
                         for (let i = 0; i < subSegments; i++) {
                             const boxAngle = subStartAngle + (subSegments > 1 ? i * subAngle : 0);
-                            if (wheelData[selectedSegment].children[i].children.length > 0) {
+                            if (wheelData[selectedSegment].Children[i].Children.length > 0) {
                                 const subBoxAngle = subStartAngle + (subSegments > 1 ? i * subAngle : 0);
-                                const grandSegments = wheelData[selectedSegment].children[i].children.length;
+                                const grandSegments = wheelData[selectedSegment].Children[i].Children.length;
                                 const minAngularGap = Math.asin((grandCircleRadius * 1.2) / grandArcRadius);
                                 const grandAngle = grandSegments > 1 ? Math.max((subAngle * 0.6 + grandGap * (grandSegments - 1)) / (grandSegments - 1), minAngularGap) : 0;
                                 const totalGrandAngle = grandSegments > 1 ? (grandSegments - 1) * grandAngle : 0;
@@ -1216,7 +1224,7 @@
         function openAddModal(item) {
             console.log("Adding new segment after item:", item);
 
-            const parentId = item.fkParentWheelId || null;
+            const parentId = item.FkParentWheelId || null;
             let order = item.order ? item.order - 1 : 1;
             if (parentId != null) {
                 order = item.order ? item.order + 1 : 1;
@@ -1228,7 +1236,7 @@
             const $dropdown = $('#newParent');
             $dropdown.empty().append('<option value="">-- Top-level Section --</option>');
             DropDownData.forEach(section => {
-                $dropdown.append(`<option value="${section.pkWheelId}">${section.name} (ID: ${section.pkWheelId})</option>`);
+                $dropdown.append(`<option value="${section.PkWheelId}">${section.Name} (ID: ${section.PkWheelId})</option>`);
             });
             if (parentId != null && parentId > 0) {
                 $('#newParent').val(parentId);
@@ -1239,10 +1247,11 @@
         }
 
         function openAddSegmentChildModal(item) {
+            debugger;
             console.log("Adding new segment after item:", item);
-            $('#newParent').attr("disable", false)
+          //  $('#newParent').attr("disable", false)
 
-            const parentId = item.pkWheelId || null;
+            const parentId = item.PkWheelId || null;
             let order = 1;
 
             $('#newName').val('new segment');
@@ -1252,11 +1261,11 @@
             const $dropdown = $('#newParent');
             $dropdown.empty().append('<option value="">-- Top-level Section --</option>');
             DropDownData.forEach(section => {
-                $dropdown.append(`<option value="${section.pkWheelId}">${section.name} (ID: ${section.pkWheelId})</option>`);
+                $dropdown.append(`<option value="${section.PkWheelId}">${section.Name} (ID: ${section.PkWheelId})</option>`);
             });
             if (parentId != null && parentId > 0) {
                 $('#newParent').val(parentId);
-                $('#newParent').attr("disable", true)
+              //  $('#newParent').attr("disable", true)
 
             }
             addModal.show();
@@ -1300,7 +1309,7 @@
 
         function AddNewSegment(item) {
             console.log("Adding new segment after item:", item);
-            const parentId = item.fkParentWheelId || null;
+            const parentId = item.FkParentWheelId || null;
             let order = item.order ? item.order - 1 : 1;
             if (parentId != null) {
                 order = item.order ? item.order + 1 : 1;
@@ -1345,6 +1354,6 @@
 
         window.addEventListener('resize', debounce(resizeCanvas, 100));
         resizeCanvas();
-        GetParentDropDown();
+       // GetParentDropDown();
     </script>
 }

@@ -62,7 +62,7 @@ namespace Portal.Controllers.api
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore, // 👈 breaks the cycle
                         NullValueHandling = NullValueHandling.Ignore,
                         Formatting = Formatting.Indented,
-                        ContractResolver = new CamelCasePropertyNamesContractResolver() // 👈 lowercase
+                        //ContractResolver = new CasePropertyNamesContractResolver() // 👈 lowercase
                     }
                 );
 
