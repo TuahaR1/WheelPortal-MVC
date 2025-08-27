@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using Newtonsoft.Json;
 
 namespace Portal.Models
 {
@@ -18,8 +18,9 @@ namespace Portal.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-       
-    public virtual WheelSection? FkParentWheel { get; set; }
-    public virtual ICollection<WheelSection> Children { get; set; } = new List<WheelSection>();
+        [JsonIgnore]  // 🔥 prevents circular loop
+
+        public virtual WheelSection? FkParentWheel { get; set; }
+    public virtual IEnumerable<WheelSection> Children { get; set; }
     }
 }
