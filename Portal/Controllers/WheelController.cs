@@ -17,7 +17,7 @@ namespace Portal.Controllers
         }
         public IActionResult Index()
         {
-            var sections =  _dbContext.WheelSections
+            var sections = _dbContext.WheelSections
                 .Where(x => x.FkParentWheelId == null)
                 .Include(x => x.Children) // subchildren
                     .ThenInclude(c => c.Children) // grandchildren
@@ -36,21 +36,21 @@ namespace Portal.Controllers
                 }
             }
 
-            
+
             return View(sections); // Pass DTOs to the view
         }
         [HttpPost]
-        public bool DeleteWheelSection([FromBody] DeleteWheelParentDto req)
+        public bool DeleteWheelSection(int id)
         {
             try
             {
-                if (req.PkWheelId <= 0)
+                if (id <= 0)
                 {
                     return false;
                 }
 
-                var sections =  _dbContext.WheelSections
-                    .Where(x => x.PkWheelId == req.PkWheelId)
+                var sections = _dbContext.WheelSections
+                    .Where(x => x.PkWheelId == id)
                     .Include(x => x.Children)
                         .ThenInclude(c => c.Children) // grandchildren
                     .ToList();
@@ -75,7 +75,7 @@ namespace Portal.Controllers
                     _dbContext.WheelSections.Remove(parent);
                 }
 
-                 _dbContext.SaveChanges();
+                _dbContext.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -85,37 +85,25 @@ namespace Portal.Controllers
         }
 
         [HttpPost]
-        public  bool SaveWheelSection([FromBody] UpdateAddWheelParentDto req)
+        public bool AddWheelSection(string Name, string Colour, int orderID, int? fkParentID)
         {
             try
             {
-
-                if (req.PkWheelId <= 0)
+                if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Colour))
                 {
-                    _dbContext.WheelSections.Add(new WheelSection
-                    {
-                        Name = req.Name,
-                        Colour = req.Colour,
-                        Order = req.Order,
-                        FkParentWheelId = req.FkParentWheelId,
-                        CreatedAt = DateTime.Now
-                    });
-                }
-                else
-                {
-                    var existing =  _dbContext.WheelSections.Find(req.PkWheelId);
-                    if (existing != null)
-                    {
-                        existing.Name = req.Name;
-                        existing.Colour = req.Colour;
-                        existing.Order = req.Order;
-                        existing.FkParentWheelId = req.FkParentWheelId;
-                        existing.UpdatedAt = DateTime.Now; // Update timestamp  
-                    }
+                    return false;
                 }
 
+                _dbContext.WheelSections.Add(new WheelSection
+                {
+                    Name = Name,
+                    Colour = Colour,
+                    Order = orderID,
+                    FkParentWheelId = fkParentID,
+                    CreatedAt = DateTime.Now
+                });
 
-                 _dbContext.SaveChanges();
+                _dbContext.SaveChanges();
                 return true;
             }
             catch (Exception ex)
@@ -127,13 +115,46 @@ namespace Portal.Controllers
 
         }
 
+
+        [HttpPost]
+        public bool EditWheelSectionFinal(int id, string Name, string Colour, int orderID, int? fkParentID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Colour))
+                {
+                    return false;
+                }
+                var existing = _dbContext.WheelSections.Find(id);
+                if (existing != null)
+                {
+                    existing.Name = Name;
+                    existing.Colour = Colour;
+                    existing.Order = orderID;
+                    existing.FkParentWheelId = fkParentID;
+                    existing.UpdatedAt = DateTime.Now; // Update timestamp  
+
+                    _dbContext.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Log to console or log file
+                Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+
+        }
+
         [HttpGet]
-        public  IActionResult GetWheelSections()
+        public IActionResult GetWheelSections()
         {
             try
             {
 
-                var sections =  _dbContext.WheelSections
+                var sections = _dbContext.WheelSections
                  .Where(x => x.FkParentWheelId == null)
                  .Include(x => x.Children)
                      .ThenInclude(c => c.Children) // grandchildren
@@ -152,7 +173,7 @@ namespace Portal.Controllers
                     }
                 }
 
-                var dropDownData =  _dbContext.WheelSections
+                var dropDownData = _dbContext.WheelSections
             .OrderBy(s => s.FkParentWheelId)
             .ThenBy(s => s.Order)
             .Select(x => new DropDownOfSegment
