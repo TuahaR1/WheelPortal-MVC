@@ -425,6 +425,7 @@
                    },
                    success: function (response) {
                        debugger;
+                       debugger;
                        console.log("GetParentDropDown Resp", response);
                        if (response) {
                            DropDownData = response.data || [];
@@ -443,6 +444,7 @@
                            });
                            if (editVal) $editParent.val(editVal);
                            if (newVal) $newParent.val(newVal);
+                              $('#loading').hide();
                            updateCanvasHeight();
                            drawWheel();
                        } else {
@@ -462,6 +464,7 @@
            }
 
               function drawWheel() {
+             
                const segments = wheelData.length;
                const svg = document.querySelector('#chartContainer svg') || document.createElementNS("http://www.w3.org/2000/svg", "svg");
                svg.setAttribute('width', canvas.width);
@@ -683,7 +686,7 @@
 
                const angle = segments > 0 ? (2 * Math.PI) / segments : 0;
 
-               if (isSubBoxesActive && selectedSegment !== null) {
+               if (isSubBoxesActive && selectedSegment !== null&&wheelData[selectedSegment].Children!=null) {
                    const subSegments = wheelData[selectedSegment].Children.length;
                    if (subSegments > 0) {
                        const segmentAngle = selectedSegment * angle + angle / 2;
@@ -1235,9 +1238,9 @@
                console.log("Adding new segment after item:", item);
 
                const parentId = item.FkParentWheelId || null;
-               let order = item.order ? item.order - 1 : 1;
+               let order = item.Order ? item.Order - 1 : 1;
                if (parentId != null) {
-                   order = item.order ? item.order + 1 : 1;
+                   order = item.Order ? item.Order + 1 : 1;
                }
                $('#newName').val('new segment');
                $('#newColour').val(colors[Math.floor(Math.random() * colors.length)]);
@@ -1262,7 +1265,8 @@
              //  $('#newParent').attr("disable", false)
 
                const parentId = item.PkWheelId || null;
-               let order = 1;
+               let order = item.Order ? item.Order - 1 : 1;
+               
 
                $('#newName').val('new segment');
                $('#newColour').val(colors[Math.floor(Math.random() * colors.length)]);
