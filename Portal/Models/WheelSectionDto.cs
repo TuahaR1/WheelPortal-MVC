@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using Newtonsoft.Json;
 
 namespace Portal.Models
 {
-    public partial class WheelSection
+    public partial class WheelSectionDto
     {
-        public WheelSection()
+        public WheelSectionDto()
         {
-            InverseFkParentWheel = new HashSet<WheelSection>();
+            Children = new HashSet<WheelSectionDto>();
         }
 
         public int PkWheelId { get; set; }
@@ -18,7 +18,9 @@ namespace Portal.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
+        [JsonIgnore]  // 🔥 prevents circular loop
+
         public virtual WheelSection? FkParentWheel { get; set; }
-        public virtual ICollection<WheelSection> InverseFkParentWheel { get; set; }
+    public virtual IEnumerable<WheelSectionDto> Children { get; set; }
     }
 }

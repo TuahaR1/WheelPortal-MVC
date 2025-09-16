@@ -2,7 +2,7 @@
     ViewData["Title"] = "Privacy Policy some changes";
 }
 @using Newtonsoft.Json
-@model IEnumerable<Portal.Models.WheelSection>
+@model IEnumerable<Portal.Models.WheelSectionDto>
 @{
     var flatData = Model
        .SelectMany(parent => new[] { parent }
