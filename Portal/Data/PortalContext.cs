@@ -19,15 +19,15 @@ namespace Portal.Data
 
         public virtual DbSet<WheelSection> WheelSections { get; set; } = null!;
 
-        
+      
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<WheelSection>(entity =>
             {
-                entity.HasKey(e => e.PkWheelId);
+                entity.HasKey(e => e.PkWheelSectionId);
 
-                entity.HasIndex(e => e.FkParentWheelId, "IX_WheelSections_FkParentWheelId");
+                entity.HasIndex(e => e.FkParentId, "IX_WheelSections_FkParentWheelId");
 
                 entity.Property(e => e.Colour).HasMaxLength(255);
 
@@ -35,9 +35,10 @@ namespace Portal.Data
 
                 entity.Property(e => e.Name).HasMaxLength(255);
 
-                entity.HasOne(d => d.FkParentWheel)
-                    .WithMany(p => p.InverseFkParentWheel)
-                    .HasForeignKey(d => d.FkParentWheelId);
+                entity.HasOne(d => d.FkParent)
+                    .WithMany(p => p.InverseFkParent)
+                    .HasForeignKey(d => d.FkParentId)
+                    .HasConstraintName("FK_WheelSections_WheelSections_FkParentWheelId");
             });
 
             OnModelCreatingPartial(modelBuilder);

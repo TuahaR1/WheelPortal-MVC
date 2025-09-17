@@ -7,18 +7,18 @@ namespace Portal.Models
     {
         public WheelSection()
         {
-            InverseFkParentWheel = new HashSet<WheelSection>();
+            InverseFkParent = new HashSet<WheelSection>();
         }
 
-        public int PkWheelId { get; set; }
-        public int? FkParentWheelId { get; set; }
+        public int PkWheelSectionId { get; set; }
+        public int? FkParentId { get; set; }
         public string Name { get; set; } = null!;
         public string Colour { get; set; } = null!;
-        public int Order { get; set; }
+        public int OrderId { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual WheelSection? FkParentWheel { get; set; }
-        public virtual ICollection<WheelSection> InverseFkParentWheel { get; set; }
+        public virtual WheelSection? FkParent { get; set; }
+        public virtual ICollection<WheelSection> InverseFkParent { get; set; }
     }
 }

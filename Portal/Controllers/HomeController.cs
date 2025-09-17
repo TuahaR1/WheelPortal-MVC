@@ -68,10 +68,10 @@ namespace Portal.Controllers
                 WheelSection ws = new WheelSection();
                 ws.Name = Name;
                 ws.Colour = Colour;
-                ws.Order = orderID;
+                ws.OrderId = orderID;
                 if (fkParentID != 0)
                 {
-                    ws.FkParentWheelId = fkParentID;
+                    ws.FkParentId = fkParentID;
                 }
                 sql.AddWheelSection(ws);
             }
@@ -94,8 +94,8 @@ namespace Portal.Controllers
                 WheelSection ws = sql.GetWheelSection(id);
                 ws.Name = Name;
                 ws.Colour = Colour;
-                ws.Order = orderID;
-                ws.FkParentWheelId = fkParentID;
+                ws.OrderId = orderID;
+                ws.FkParentId = fkParentID;
                 sql.Save();
 
             }

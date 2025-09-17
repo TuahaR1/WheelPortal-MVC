@@ -24,36 +24,36 @@ namespace Portal.Models
         public IEnumerable<WheelSectionDto> GetAllWheelSections()
         {
             var sections = db.WheelSections
-     .Where(x => x.FkParentWheelId == null)
+     .Where(x => x.FkParentId == null)
      .Select(x => new WheelSectionDto
      {
-         PkWheelId = x.PkWheelId,
-         FkParentWheelId = x.FkParentWheelId,
+         PkWheelId = x.PkWheelSectionId,
+         FkParentWheelId = x.FkParentId,
          Name = x.Name,
          Colour = x.Colour,
-         Order = x.Order,
+         Order = x.OrderId,
          CreatedAt = x.CreatedAt,
          UpdatedAt = x.UpdatedAt,
 
          // First level children
-         Children = x.InverseFkParentWheel.Select(c => new WheelSectionDto
+         Children = x.InverseFkParent.Select(c => new WheelSectionDto
          {
-             PkWheelId = c.PkWheelId,
-             FkParentWheelId = c.FkParentWheelId,
+             PkWheelId = c.PkWheelSectionId,
+             FkParentWheelId = c.FkParentId,
              Name = c.Name,
              Colour = c.Colour,
-             Order = c.Order,
+             Order = c.OrderId,
              CreatedAt = c.CreatedAt,
              UpdatedAt = c.UpdatedAt,
 
              // Second level children
-             Children = c.InverseFkParentWheel.Select(gc => new WheelSectionDto
+             Children = c.InverseFkParent.Select(gc => new WheelSectionDto
              {
-                 PkWheelId = gc.PkWheelId,
-                 FkParentWheelId = gc.FkParentWheelId,
+                 PkWheelId = gc.PkWheelSectionId,
+                 FkParentWheelId = gc.FkParentId,
                  Name = gc.Name,
                  Colour = gc.Colour,
-                 Order = gc.Order,
+                 Order = gc.OrderId,
                  CreatedAt = gc.CreatedAt,
                  UpdatedAt = gc.UpdatedAt,
 
@@ -83,16 +83,16 @@ namespace Portal.Models
         {
             return db.WheelSections.Select(x => new DropDownOfSegment
             {
-                PkWheelId = x.PkWheelId,
+                PkWheelId = x.PkWheelSectionId,
                 Name = x.Name
             })
             .ToList();
         }
         public WheelSection? GetWheelSection(int id)
         {
-            return db.WheelSections.Where(x => x.PkWheelId == id)
-                    .Include(x => x.InverseFkParentWheel)
-                        .ThenInclude(x => x.InverseFkParentWheel)
+            return db.WheelSections.Where(x => x.PkWheelSectionId == id)
+                    .Include(x => x.InverseFkParent)
+                        .ThenInclude(x => x.InverseFkParent)
                 .FirstOrDefault();
 
         }
@@ -106,13 +106,13 @@ namespace Portal.Models
         {
 
 
-                foreach (var child in ws.InverseFkParentWheel)
+                foreach (var child in ws.InverseFkParent)
                 {
-                    db.WheelSections.RemoveRange(child.InverseFkParentWheel); // Grandchildren
+                    db.WheelSections.RemoveRange(child.InverseFkParent); // Grandchildren
                 }
 
                 // Delete children
-                db.WheelSections.RemoveRange(ws.InverseFkParentWheel);
+                db.WheelSections.RemoveRange(ws.InverseFkParent);
             
 
             // Delete parent
