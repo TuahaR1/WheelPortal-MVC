@@ -1,6 +1,7 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy some changes";
+    ViewData["Title"] = "Home Page";
 }
+
 @using Newtonsoft.Json
 @model IEnumerable<Portal.Models.WheelSectionDto>
 @{
@@ -178,6 +179,7 @@
         </div>
     </div>
 </div>
+
 @section Scripts
 {
     <script>
@@ -464,7 +466,7 @@
            }
 
               function drawWheel() {
-             
+
                const segments = wheelData.length;
                const svg = document.querySelector('#chartContainer svg') || document.createElementNS("http://www.w3.org/2000/svg", "svg");
                svg.setAttribute('width', canvas.width);
@@ -1266,7 +1268,7 @@
 
                const parentId = item.PkWheelId || null;
                let order = item.Order ? item.Order - 1 : 1;
-               
+
 
                $('#newName').val('new segment');
                $('#newColour').val(colors[Math.floor(Math.random() * colors.length)]);

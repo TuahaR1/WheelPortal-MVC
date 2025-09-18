@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Portal.Data;
 using Portal.Models;
-using Portal.ViewModel;
 
 namespace Portal.Controllers
 {
