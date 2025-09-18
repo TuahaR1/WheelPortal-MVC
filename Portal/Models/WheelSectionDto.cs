@@ -14,7 +14,7 @@ namespace Portal.Models
         public int? FkParentWheelId { get; set; }
         public string Name { get; set; } = null!;
         public string Colour { get; set; } = null!;
-        public int Order { get; set; }
+        public int? Order { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
