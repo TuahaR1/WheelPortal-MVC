@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Portal.Data;
-using Portal.ViewModel;
 using System.Resources;
 using static System.Collections.Specialized.BitVector32;
 

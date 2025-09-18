@@ -23,4 +23,9 @@ namespace Portal.Models
         public virtual WheelSection? FkParentWheel { get; set; }
     public virtual IEnumerable<WheelSectionDto> Children { get; set; }
     }
+    public class DropDownOfSegment
+    {
+        public int PkWheelId { get; set; }
+        public string? Name { get; set; }
+    }
 }
