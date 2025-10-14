@@ -18,7 +18,6 @@ namespace Portal.Controllers
 
 
 
-
         public IActionResult Index()
         {
             return View(sql.GetAllWheelSections());
@@ -35,7 +34,7 @@ namespace Portal.Controllers
 
 
                 var dropDownData = sql.GetAllDropDownOfSegment();
-            
+
                 // ✅ Serialize with Newtonsoft.Json inside controller
                 var json = JsonConvert.SerializeObject(
                     new { success = true, data = dropDownData, wheeldata = sections },
@@ -89,20 +88,39 @@ namespace Portal.Controllers
         {
             try
             {
-                WheelSection ws = sql.GetWheelSection(id);
+                var ws = sql.GetWheelSection(id);
+                if (ws == null)
+                    return false;
+
+                // Prevent self-parenting
+                if (fkParentID == id)
+                    return false;
+
+                // Set parent if valid, otherwise null
+                if (fkParentID != 0)
+                {
+                    var parent = sql.GetWheelSection(fkParentID);
+                    if (parent == null)
+                        return false;
+                    ws.FkParentId = fkParentID;
+                }
+                else
+                {
+                    ws.FkParentId = null;
+                }
+
                 ws.Name = Name;
                 ws.Colour = Colour;
                 ws.OrderId = orderID;
-                ws.FkParentId = fkParentID;
                 sql.Save();
-
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
             return true;
         }
+
 
 
         public bool DeleteWheelSection(int id)
@@ -118,6 +136,7 @@ namespace Portal.Controllers
             }
             return true;
         }
+
 
 
     }
