@@ -58,6 +58,8 @@
         #chartContainer svg .add-child-icon {
             cursor: pointer !important;
             pointer-events: all;
+            outline:none;
+            border:none;
         }
 
     /* #edit::before { */
@@ -477,7 +479,7 @@
                    },
                    success: function (response) {
                        debugger;
-                       debugger;
+                      
                        console.log("GetParentDropDown Resp", response);
                        if (response) {
                            DropDownData = response.data || [];
@@ -514,6 +516,19 @@
                    }
                });
            }
+                   // 🔹 Add invisible hitbox behind SVG icons to enlarge clickable area
+        function addClickHitbox(groupElement, extra = 70) {
+            const hitbox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const expand = extra / 2;
+            hitbox.setAttribute("x", -expand);
+            hitbox.setAttribute("y", -expand);
+            hitbox.setAttribute("width", iconSize + extra);
+            hitbox.setAttribute("height", iconSize + extra);
+            hitbox.setAttribute("fill", "transparent"); // invisible hit zone
+            hitbox.setAttribute("pointer-events", "all");
+            groupElement.insertBefore(hitbox, groupElement.firstChild); // behind visible icon
+        }
+
 
               function drawWheel() {
 
@@ -661,6 +676,8 @@
                        pencilPathElem.setAttribute('d', penPath);
                        pencilPathElem.setAttribute('fill', '#000');
                        pencilGroup.appendChild(pencilPathElem);
+                       addClickHitbox(pencilGroup); // ✅ enlarged clickable area
+
                        pencilGroup.setAttribute('class', 'pencil-icon');
                        pencilGroup.setAttribute('tabindex', '0');
                        pencilGroup.setAttribute('role', 'button');
@@ -679,6 +696,8 @@
                        addPathElem.setAttribute('d', plusPath);
                        addPathElem.setAttribute('fill', '#000');
                        addGroup.appendChild(addPathElem);
+                       addClickHitbox(addGroup); // ✅ enlarged clickable area
+
                        addGroup.setAttribute('class', 'add-icon');
                        addGroup.setAttribute('data-add-segment-index', i);
                        addGroup.setAttribute('role', 'button');
@@ -698,6 +717,8 @@
                            childPathElem.setAttribute('d', plusPath);
                            childPathElem.setAttribute('fill', '#0066cc');
                            childAddGroup.appendChild(childPathElem);
+                           addClickHitbox(childAddGroup); // ✅ enlarged clickable area
+
                            childAddGroup.setAttribute('class', 'add-child-icon');
                            childAddGroup.setAttribute('data-segment-index', i);
                            childAddGroup.setAttribute('role', 'button');
@@ -757,6 +778,8 @@
                            subAddPathElemBefore.setAttribute('d', plusPath);
                            subAddPathElemBefore.setAttribute('fill', '#383737');
                            subAddGroupBefore.appendChild(subAddPathElemBefore);
+                           addClickHitbox(subAddGroupBefore); // ✅ enlarged clickable area
+
                            subAddGroupBefore.setAttribute('class', 'add-icon');
                            subAddGroupBefore.setAttribute('role', 'button');
                            subAddGroupBefore.setAttribute('aria-label', `Add sub-segment after last sub-segment of ${wheelData[selectedSegment].Name}`);
@@ -821,6 +844,8 @@
                                    subAddPathElem.setAttribute('d', plusPath);
                                    subAddPathElem.setAttribute('fill', '#383737');
                                    subAddGroup.appendChild(subAddPathElem);
+                                   addClickHitbox(subAddGroup); // ✅ enlarged clickable area
+
                                    subAddGroup.setAttribute('class', 'add-icon');
                                    subAddGroup.setAttribute('role', 'button');
                                    subAddGroup.setAttribute('aria-label', `Add sub-segment after ${wheelData[selectedSegment].Children[i].Name}`);
@@ -846,6 +871,8 @@
                                    subChildPathElem.setAttribute('d', plusPath);
                                    subChildPathElem.setAttribute('fill', '#383737');
                                    subChildAddGroup.appendChild(subChildPathElem);
+                                   addClickHitbox(subChildAddGroup); // ✅ enlarged clickable area
+
                                    subChildAddGroup.setAttribute('class', 'add-child-icon');
                                    subChildAddGroup.setAttribute('role', 'button');
                                    subChildAddGroup.setAttribute('aria-label', `Add child to ${wheelData[selectedSegment].Children[i].Name}`);
@@ -898,6 +925,8 @@
                                    grandAddPathElemBefore.setAttribute('d', plusPath);
                                    grandAddPathElemBefore.setAttribute('fill', '#383737');
                                    grandAddGroupBefore.appendChild(grandAddPathElemBefore);
+                                   addClickHitbox(grandAddGroupBefore); // ✅ enlarged clickable area
+
                                    grandAddGroupBefore.setAttribute('class', 'add-icon');
                                    grandAddGroupBefore.setAttribute('role', 'button');
                                    grandAddGroupBefore.setAttribute('aria-label', `Add grand-segment before first grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
@@ -951,6 +980,8 @@
                                        grandAddPathElem.setAttribute('d', plusPath);
                                        grandAddPathElem.setAttribute('fill', '#383737');
                                        grandAddGroup.appendChild(grandAddPathElem);
+                                       addClickHitbox(grandAddGroup); // ✅ enlarged clickable area
+
                                        grandAddGroup.setAttribute('class', 'add-icon');
                                        grandAddGroup.setAttribute('role', 'button');
                                        grandAddGroup.setAttribute('aria-label', `Add grand-segment after ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
@@ -970,6 +1001,8 @@
                                        grandPencilPathElem.setAttribute('d', penPath);
                                        grandPencilPathElem.setAttribute('fill', '#000');
                                        grandPencilGroup.appendChild(grandPencilPathElem);
+                                       addClickHitbox(grandPencilGroup); // ✅ enlarged clickable area
+
                                        grandPencilGroup.setAttribute('class', 'pencil-icon');
                                        grandPencilGroup.setAttribute('role', 'button');
                                        grandPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
@@ -992,6 +1025,8 @@
                                        grandAddPathElemAfter.setAttribute('d', plusPath);
                                        grandAddPathElemAfter.setAttribute('fill', '#383737');
                                        grandAddGroupAfter.appendChild(grandAddPathElemAfter);
+                                       addClickHitbox(grandAddGroupAfter); // ✅ enlarged clickable area
+
                                        grandAddGroupAfter.setAttribute('class', 'add-icon');
                                        grandAddGroupAfter.setAttribute('role', 'button');
                                        grandAddGroupAfter.setAttribute('aria-label', `Add grand-segment after last grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
@@ -1023,6 +1058,8 @@
                                    grandAddPathElemAfter.setAttribute('d', plusPath);
                                    grandAddPathElemAfter.setAttribute('fill', '#383737');
                                    grandAddGroupAfter.appendChild(grandAddPathElemAfter);
+                                   addClickHitbox(grandAddGroupAfter); // ✅ enlarged clickable area
+
                                    grandAddGroupAfter.setAttribute('class', 'add-icon');
                                    grandAddGroupAfter.addEventListener('click', () => {
                                        openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
@@ -1046,6 +1083,8 @@
                            subAddPathElemAfter.setAttribute('d', plusPath);
                            subAddPathElemAfter.setAttribute('fill', '#383737');
                            subAddGroupAfter.appendChild(subAddPathElemAfter);
+                           addClickHitbox(subAddGroupAfter); // ✅ enlarged clickable area
+
                            subAddGroupAfter.setAttribute('class', 'add-icon');
                            subAddGroupAfter.addEventListener('click', () => {
                                openAddModal(wheelData[selectedSegment].Children[wheelData[selectedSegment].Children.length - 1]);

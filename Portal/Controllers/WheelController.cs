@@ -21,6 +21,9 @@ namespace Portal.Controllers
         public IActionResult Index()
         {
             return View(sql.GetAllWheelSections());
+        }public IActionResult Index2()
+        {
+            return View();
         }
 
         [HttpGet]

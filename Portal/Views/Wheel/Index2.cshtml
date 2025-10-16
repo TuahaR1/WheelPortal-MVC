@@ -1,0 +1,94 @@
+﻿@{
+    ViewData["Title"] = "Draggable Pie Chart";
+}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div style="display: flex; gap: 30px;">
+    <div style="width: 300px;">
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div>
+        <h3>Reorder Segments</h3>
+        <ul id="segmentList" style="list-style: none; padding: 0;">
+            <li draggable="true" data-index="0">List to Sell</li>
+            <li draggable="true" data-index="1">Sale to Completion</li>
+            <li draggable="true" data-index="2">New Segment</li>
+            <li draggable="true" data-index="3">Valuation</li>
+            <li draggable="true" data-index="4">Listing</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // --- Step 1: Chart data ---
+    let chartData = {
+        labels: ["List to Sell", "Sale to Completion", "New Segment", "Valuation", "Listing"],
+        datasets: [{
+            data: [10, 15, 20, 25, 30],
+            backgroundColor: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800']
+        }]
+    };
+
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    let myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+    });
+
+    // --- Step 2: Drag-and-drop logic ---
+    const list = document.getElementById('segmentList');
+    let draggedItem = null;
+
+    list.addEventListener('dragstart', e => {
+        draggedItem = e.target;
+        e.dataTransfer.effectAllowed = 'move';
+    });
+
+    list.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+            list.appendChild(draggedItem);
+        } else {
+            list.insertBefore(draggedItem, afterElement);
+        }
+    });
+
+    list.addEventListener('drop', async e => {
+        e.preventDefault();
+
+        // Get new order
+        const newOrder = Array.from(list.children).map(li => li.textContent.trim());
+
+        // Step 3: Update chart
+        chartData.labels = newOrder;
+        myChart.update();
+
+        // Step 4: Hit MVC API
+        await fetch('/api/Chart/UpdateOrder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newOrder })
+        })
+        .then(res => res.json())
+        .then(data => console.log('API response:', data))
+        .catch(err => console.error(err));
+    });
+
+    // Helper: find where to drop
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+</script>
