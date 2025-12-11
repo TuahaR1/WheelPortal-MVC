@@ -337,26 +337,51 @@ function GetParentDropDown() {
         }
     });
 }
-// 🔹 Add invisible hitbox behind SVG icons to enlarge clickable area
 function addClickHitbox(groupElement, extra = 200) {
-    
-    const bbox = groupElement.getBBox(); // Get bounding box of the icon
-    const hitbox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
-    // Centering and expanding by 'extra' (200px in all directions)
-    const expand = extra / 2;
+    const bbox = groupElement.getBBox();
 
-    hitbox.setAttribute("x", bbox.x +extra);
-    hitbox.setAttribute("y", bbox.y + extra);
-    hitbox.setAttribute("width", bbox.width + extra);
-    hitbox.setAttribute("height", bbox.height + extra);
-    hitbox.setAttribute('class', 'icon-item');
+    // Center of icon inside the group
+    const cx = bbox.x + bbox.width / 2;
+    const cy = bbox.y + bbox.height / 2;
 
-    hitbox.setAttribute("fill", "transparent");
-    hitbox.setAttribute("pointer-events", "all");
+    // Size of enlarged hitbox
+    const w = bbox.width + extra;
+    const h = bbox.height + extra;
 
-    // Insert the hitbox behind the icon
-    groupElement.insertBefore(hitbox, groupElement.firstChild);
+    // Helper to make a hitbox
+    const makeBox = (isdown) => {
+        const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        if (isdown) {
+        r.setAttribute("x", w/2);
+        r.setAttribute("y", h);
+
+        } else {
+
+        r.setAttribute("x", cx - w);
+        r.setAttribute("y", cy - h);
+
+        }
+        r.setAttribute("width", w);
+        r.setAttribute("height", h);
+        r.setAttribute("fill", "transparent");
+        r.setAttribute("pointer-events", "all");
+        return r;
+    };
+
+    // Add BACK hitbox first
+    const back = makeBox(false);
+    groupElement.insertBefore(back, groupElement.firstChild);
+
+    // Move the icon to the exact center of the group
+    // Remove old transform and re-center
+    const icon = groupElement.querySelector("path");
+    icon.setAttribute("transform", `translate(${cx - bbox.x}, ${cy - bbox.y})`);
+    icon.setAttribute("pointer-events", `all`);
+
+    // Add FRONT hitbox
+    const front = makeBox(true);
+    groupElement.appendChild(front);
 }
 
 
