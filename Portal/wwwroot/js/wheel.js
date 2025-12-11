@@ -5,8 +5,8 @@
 // Initialize wheelData and DropDownData from Model
 const el = document.getElementById("chartContainer");
 
-let wheelData = JSON.parse(el.dataset.wheel);
-let DropDownData = JSON.parse(el.dataset.dropdown);
+let wheelData;
+let DropDownData;
 
 function adjustColor(color, factor) {
     // Map of common color names to hex values
@@ -75,14 +75,29 @@ function debounce(func, wait) {
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
 }
-const debouncedDrawWheel = debounce(drawWheel, 50);
 
+function setData(options) {
+    debugger;
+    console.log("Opn", options)
+    const settings = $.extend({
+        wheelData: [],
+        dropdownData: {},
+    }, options);
+
+    // Fix: capital 'D' to match the key used when calling setData
+    wheelData = settings.wheelData;       // ← was wheeldata (wrong)
+    DropDownData = settings.dropdownData; // this one was already correct
+
+    window.addEventListener('resize', debounce(resizeCanvas, 100));
+    resizeCanvas();
+}
 
 $('#loading').hide();
 
 console.log("WheelData", wheelData);
 console.log("DropDownData", DropDownData);
 
+const debouncedDrawWheel = debounce(drawWheel, 50);
 let colors = [
     "#FBA969", "#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF",
     "#A66DD4", "#FF924C", "#FF5DA2", "#00C2A8", "#FFD166",
@@ -299,7 +314,7 @@ function GetParentDropDown() {
             $('#loading').show();
         },
         success: function (response) {
-            
+
 
             console.log("GetParentDropDown Resp", response);
             if (response) {
@@ -353,13 +368,13 @@ function addClickHitbox(groupElement, extra = 200) {
     const makeBox = (isdown) => {
         const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         if (isdown) {
-        r.setAttribute("x", w/2);
-        r.setAttribute("y", h);
+            r.setAttribute("x", w / 2);
+            r.setAttribute("y", h);
 
         } else {
 
-        r.setAttribute("x", cx - w);
-        r.setAttribute("y", cy - h);
+            r.setAttribute("x", cx - w);
+            r.setAttribute("y", cy - h);
 
         }
         r.setAttribute("width", w);
@@ -387,7 +402,7 @@ function addClickHitbox(groupElement, extra = 200) {
 
 
 function drawWheel() {
-
+    debugger;
     const segments = wheelData.length;
     const svg = document.querySelector('#chartContainer svg') || document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute('width', canvas.width);
@@ -536,6 +551,8 @@ function drawWheel() {
 
             pencilGroup.setAttribute('class', 'pencil-icon');
             pencilGroup.setAttribute('tabindex', '0');
+            pencilGroup.setAttribute('pointer-events', 'all');
+
             pencilGroup.setAttribute('role', 'button');
             pencilGroup.setAttribute('aria-label', `Edit ${wheelData[i].Name}`);
             pencilGroup.addEventListener('click', () => {
@@ -558,6 +575,7 @@ function drawWheel() {
             addGroup.setAttribute('data-add-segment-index', i);
             addGroup.setAttribute('role', 'button');
             addGroup.setAttribute('tabindex', '0');
+            addGroup.setAttribute('pointer-events', 'all');
 
             addGroup.setAttribute('aria-label', `Add segment after ${wheelData[i].Name}`);
             addGroup.addEventListener("click", () => {
@@ -580,6 +598,7 @@ function drawWheel() {
                 childAddGroup.setAttribute('role', 'button');
                 childAddGroup.setAttribute('aria-label', `Add child to ${wheelData[i].Name}`);
                 childAddGroup.setAttribute('tabindex', '0');
+                childAddGroup.setAttribute('pointer-events', 'all');
 
                 childAddGroup.addEventListener("click", () => {
                     openAddSegmentChildModal(wheelData[i]);
@@ -640,6 +659,7 @@ function drawWheel() {
                 subAddGroupBefore.setAttribute('role', 'button');
                 subAddGroupBefore.setAttribute('aria-label', `Add sub-segment after last sub-segment of ${wheelData[selectedSegment].Name}`);
                 subAddGroupBefore.setAttribute('tabindex', '0');
+                subAddGroupBefore.setAttribute('pointer-events', 'all');
                 subAddGroupBefore.addEventListener('click', () => {
                     openAddModal(wheelData[selectedSegment].Children[0]);
 
@@ -699,6 +719,7 @@ function drawWheel() {
                         const subAddPathElem = document.createElementNS("http://www.w3.org/2000/svg", "path");
                         subAddPathElem.setAttribute('d', plusPath);
                         subAddPathElem.setAttribute('fill', '#383737');
+                        subAddPathElem.setAttribute('pointer-events', 'all');
                         subAddGroup.appendChild(subAddPathElem);
                         addClickHitbox(subAddGroup); // ✅ enlarged clickable area
 
@@ -706,6 +727,8 @@ function drawWheel() {
                         subAddGroup.setAttribute('role', 'button');
                         subAddGroup.setAttribute('aria-label', `Add sub-segment after ${wheelData[selectedSegment].Children[i].Name}`);
                         subAddGroup.setAttribute('tabindex', '0');
+                        subAddGroup.setAttribute('pointer-events', 'all');
+
                         subAddGroup.addEventListener('click', () => {
 
                             openAddModal(wheelData[selectedSegment].Children[i]);
@@ -733,6 +756,8 @@ function drawWheel() {
                         subChildAddGroup.setAttribute('role', 'button');
                         subChildAddGroup.setAttribute('aria-label', `Add child to ${wheelData[selectedSegment].Children[i].Name}`);
                         subChildAddGroup.setAttribute('tabindex', '0');
+                        subChildAddGroup.setAttribute('pointer-events', 'all');
+
                         subChildAddGroup.addEventListener('click', () => {
                             openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
                         });
@@ -752,6 +777,7 @@ function drawWheel() {
                     subPencilGroup.setAttribute('role', 'button');
                     subPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].Children[i].Name}`);
                     subPencilGroup.setAttribute('tabindex', '0');
+                    subPencilGroup.setAttribute('pointer-events', 'all');
                     subPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].Children[i]));
                     subPencilGroup.addEventListener('keydown', (event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
@@ -787,6 +813,7 @@ function drawWheel() {
                         grandAddGroupBefore.setAttribute('role', 'button');
                         grandAddGroupBefore.setAttribute('aria-label', `Add grand-segment before first grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
                         grandAddGroupBefore.setAttribute('tabindex', '0');
+                        grandAddGroupBefore.setAttribute('pointer-events', 'all');
                         grandAddGroupBefore.addEventListener('click', () => {
                             openAddSegmentChildModal(wheelData[selectedSegment].Children[i]);
 
@@ -834,6 +861,7 @@ function drawWheel() {
                             grandAddGroup.setAttribute('transform', `translate(${grandPlusX - iconSize / 2}, ${grandPlusY - iconSize / 2}) scale(${scale})`);
                             const grandAddPathElem = document.createElementNS("http://www.w3.org/2000/svg", "path");
                             grandAddPathElem.setAttribute('d', plusPath);
+
                             grandAddPathElem.setAttribute('fill', '#383737');
                             grandAddGroup.appendChild(grandAddPathElem);
                             addClickHitbox(grandAddGroup); // ✅ enlarged clickable area
@@ -842,6 +870,8 @@ function drawWheel() {
                             grandAddGroup.setAttribute('role', 'button');
                             grandAddGroup.setAttribute('aria-label', `Add grand-segment after ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
                             grandAddGroup.setAttribute('tabindex', '0');
+                            grandAddGroup.setAttribute('pointer-events', 'all');
+
                             grandAddGroup.addEventListener('click', () => {
                                 openAddModal(wheelData[selectedSegment].Children[i].Children[j]);
                             });
@@ -863,6 +893,8 @@ function drawWheel() {
                             grandPencilGroup.setAttribute('role', 'button');
                             grandPencilGroup.setAttribute('aria-label', `Edit ${wheelData[selectedSegment].Children[i].Children[j].Name}`);
                             grandPencilGroup.setAttribute('tabindex', '0');
+                            grandPencilGroup.setAttribute('pointer-events', 'all');
+
                             grandPencilGroup.addEventListener('click', () => populateEditModal(wheelData[selectedSegment].Children[i].Children[j]));
                             grandPencilGroup.addEventListener('keydown', (event) => {
                                 if (event.key === 'Enter' || event.key === ' ') {
@@ -887,6 +919,8 @@ function drawWheel() {
                                 grandAddGroupAfter.setAttribute('role', 'button');
                                 grandAddGroupAfter.setAttribute('aria-label', `Add grand-segment after last grand-segment of ${wheelData[selectedSegment].Children[i].Name}`);
                                 grandAddGroupAfter.setAttribute('tabindex', '0');
+                                grandAddGroupAfter.setAttribute('pointer-events', 'all');
+
                                 grandAddGroupAfter.addEventListener('click', () => {
                                     openAddModal(wheelData[selectedSegment].Children[i].Children[j]);
 
@@ -913,6 +947,8 @@ function drawWheel() {
                         const grandAddPathElemAfter = document.createElementNS("http://www.w3.org/2000/svg", "path");
                         grandAddPathElemAfter.setAttribute('d', plusPath);
                         grandAddPathElemAfter.setAttribute('fill', '#383737');
+                        grandAddPathElemAfter.setAttribute('pointer-events', 'all');
+
                         grandAddGroupAfter.appendChild(grandAddPathElemAfter);
                         addClickHitbox(grandAddGroupAfter); // ✅ enlarged clickable area
 
@@ -938,10 +974,13 @@ function drawWheel() {
                 const subAddPathElemAfter = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 subAddPathElemAfter.setAttribute('d', plusPath);
                 subAddPathElemAfter.setAttribute('fill', '#383737');
+
                 subAddGroupAfter.appendChild(subAddPathElemAfter);
                 addClickHitbox(subAddGroupAfter); // ✅ enlarged clickable area
 
                 subAddGroupAfter.setAttribute('class', 'add-icon');
+                subAddGroupAfter.setAttribute('pointer-events', 'all');
+
                 subAddGroupAfter.addEventListener('click', () => {
                     openAddModal(wheelData[selectedSegment].Children[wheelData[selectedSegment].Children.length - 1]);
 
@@ -1207,7 +1246,7 @@ function openAddModal(item) {
 }
 
 function openAddSegmentChildModal(item) {
-    
+
     console.log("Adding new segment after item:", item);
     //  $('#newParent').attr("disable", false)
 
@@ -1312,7 +1351,4 @@ function toggleEdit() {
     drawWheel();
 }
 
-window.addEventListener('resize', debounce(resizeCanvas, 100));
-resizeCanvas();
-// GetParentDropDown();
 

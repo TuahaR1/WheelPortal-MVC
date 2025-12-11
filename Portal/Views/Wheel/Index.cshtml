@@ -182,4 +182,11 @@
 @section Scripts
 {
     <script src="~/js/wheel.js"></script>
+    <script>
+
+        setData({
+            dropdownData: @Html.Raw(JsonConvert.SerializeObject(flatData)),
+            wheelData: @Html.Raw(JsonConvert.SerializeObject(Model))
+        });
+    </script>
 }
