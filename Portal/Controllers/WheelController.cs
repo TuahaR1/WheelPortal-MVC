@@ -21,7 +21,8 @@ namespace Portal.Controllers
         public IActionResult Index()
         {
             return View(sql.GetAllWheelSections());
-        }public IActionResult Index2()
+        }
+        public IActionResult Index2()
         {
             return View();
         }
@@ -68,11 +69,12 @@ namespace Portal.Controllers
                 WheelSection ws = new WheelSection();
                 ws.Name = Name;
                 ws.Colour = Colour;
-                ws.OrderId = orderID;
+                ws.OrderId = orderID > 0 ? orderID : 1;
                 if (fkParentID != 0)
                 {
                     ws.FkParentId = fkParentID;
                 }
+
                 sql.AddWheelSection(ws);
             }
             catch (Exception)
@@ -87,35 +89,22 @@ namespace Portal.Controllers
             return sql.GetWheelSection(id);
         }
 
-        public bool EditWheelSectionFinal(int id, string Name, string Colour, int orderID, int fkParentID)
+        public bool EditWheelSectionFinal(int id, string Name, string Colour, int orderID, int? fkParentID)
         {
             try
             {
-                var ws = sql.GetWheelSection(id);
-                if (ws == null)
-                    return false;
-
-                // Prevent self-parenting
-                if (fkParentID == id)
-                    return false;
-
-                // Set parent if valid, otherwise null
-                if (fkParentID != 0)
+                if (fkParentID >=0)
                 {
                     var parent = sql.GetWheelSection(fkParentID);
                     if (parent == null)
                         return false;
-                    ws.FkParentId = fkParentID;
                 }
                 else
                 {
-                    ws.FkParentId = null;
+                    fkParentID = null;
                 }
 
-                ws.Name = Name;
-                ws.Colour = Colour;
-                ws.OrderId = orderID;
-                sql.Save();
+                sql.UpdateWheelSection(id,Name,Colour,orderID,fkParentID);
             }
             catch
             {
