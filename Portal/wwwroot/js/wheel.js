@@ -766,7 +766,8 @@ function drawWheel() {
 
                     // Add pencil icon for editing sub-segment (bottom-right corner)
                     const subPencilX = boxX + 20;
-                    const subPencilY = boxY - scaledSubSize * zoomLevel; // Above circle
+                    //  const subPencilY = boxY - scaledSubSize * zoomLevel; // Above circle
+                    const subPencilY = boxY - SubCircleRadius+20 * zoomLevel; // Above text
                     const subPencilGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     subPencilGroup.setAttribute('transform', `translate(${subPencilX - iconSize / 2}, ${subPencilY - iconSize / 2}) scale(${scale})`);
                     const subPencilPathElem = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -879,7 +880,7 @@ function drawWheel() {
                         }
                         if (editMode) {
                             // Add pencil icon for editing grandchild-segment (bottom-right corner)
-                            const grandPencilX = grandBoxX + 10;
+                            const grandPencilX = grandBoxX + 20;
                             const grandPencilY = grandBoxY - grandCircleRadius + 20 * zoomLevel; // Above circle
                             const grandPencilGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
                             grandPencilGroup.setAttribute('transform', `translate(${grandPencilX - iconSize / 2}, ${grandPencilY - iconSize / 2}) scale(${scale})`);
