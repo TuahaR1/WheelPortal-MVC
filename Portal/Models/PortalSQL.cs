@@ -188,23 +188,86 @@ namespace Portal.Models
         public void DeleteWheelSection(WheelSection? ws)
         {
 
+            if (ws == null)
+                return;
 
+            int deletedOrder = ws.OrderId!.Value;
+            int? parentId = ws.FkParentId;
+
+            // 2️⃣ Delete grandchildren
             foreach (var child in ws.InverseFkParent)
             {
-                db.WheelSections.RemoveRange(child.InverseFkParent); // Grandchildren
+                db.WheelSections.RemoveRange(child.InverseFkParent);
             }
 
-            // Delete children
+            // 3️⃣ Delete children
             db.WheelSections.RemoveRange(ws.InverseFkParent);
 
-
-            // Delete parent
+            // 4️⃣ Delete parent
             db.WheelSections.Remove(ws);
 
+            // 5️⃣ Shift orders AFTER deleted position
+            var query = db.WheelSections.AsQueryable();
+
+            if (parentId != null)
+                query = query.Where(x => x.FkParentId == parentId);
+            else
+                query = query.Where(x => x.FkParentId == null);
+
+            query = query.Where(x => x.OrderId > deletedOrder);
+
+            foreach (var item in query.ToList())
+            {
+                item.OrderId -= 1;
+            }
 
             db.SaveChanges();
             return;
         }
+        public void DeleteWheelSection(int wheelSectionId)
+        {
+            // 1️⃣ Load section including children
+            var ws = db.WheelSections
+                .Include(x => x.InverseFkParent)
+                .ThenInclude(x => x.InverseFkParent)
+                .FirstOrDefault(x => x.PkWheelSectionId == wheelSectionId);
+
+            if (ws == null)
+                return;
+
+            int deletedOrder = ws.OrderId!.Value;
+            int? parentId = ws.FkParentId;
+
+            // 2️⃣ Delete grandchildren
+            foreach (var child in ws.InverseFkParent)
+            {
+                db.WheelSections.RemoveRange(child.InverseFkParent);
+            }
+
+            // 3️⃣ Delete children
+            db.WheelSections.RemoveRange(ws.InverseFkParent);
+
+            // 4️⃣ Delete parent
+            db.WheelSections.Remove(ws);
+
+            // 5️⃣ Shift orders AFTER deleted position
+            var query = db.WheelSections.AsQueryable();
+
+            if (parentId != null)
+                query = query.Where(x => x.FkParentId == parentId);
+            else
+                query = query.Where(x => x.FkParentId == null);
+
+            query = query.Where(x => x.OrderId > deletedOrder);
+
+            foreach (var item in query.ToList())
+            {
+                item.OrderId -= 1;
+            }
+
+            db.SaveChanges();
+        }
+
         #endregion
 
         public void Save()
