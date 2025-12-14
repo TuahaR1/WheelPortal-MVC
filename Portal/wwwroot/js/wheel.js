@@ -77,7 +77,7 @@ function debounce(func, wait) {
 }
 
 function setData(options) {
-    debugger;
+    
     console.log("Opn", options)
     const settings = $.extend({
         wheelData: [],
@@ -402,7 +402,7 @@ function addClickHitbox(groupElement, extra = 200) {
 
 
 function drawWheel() {
-    debugger;
+    
     const segments = wheelData.length;
     const svg = document.querySelector('#chartContainer svg') || document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute('width', canvas.width);
@@ -579,8 +579,15 @@ function drawWheel() {
 
             addGroup.setAttribute('aria-label', `Add segment after ${wheelData[i].Name}`);
             addGroup.addEventListener("click", () => {
-                openAddModal(wheelData[i]);
-            })
+                
+                if (i === 0) {
+
+                    // Add after the last segment
+                    openAddModal(wheelData[wheelData.length -1]);
+                } else {
+                    // Add after the previous segment (before current one)
+                    openAddModal(wheelData[i - 1]);
+                }            })
             // Add icon for adding child segment (only for active or hovered segment)
             if ((i === selectedSegment || i === hoveredSegment) && wheelData[selectedSegment].Children.length <= 0) {
                 const childX = centerX + (maxRadius + 30) * Math.cos(midAngle);
@@ -1225,8 +1232,9 @@ function openAddModal(item) {
     console.log("Adding new segment after item:", item);
 
     const parentId = item.FkParentWheelId || null;
-    let order = item.Order ? item.Order - 1 : 1;
+    let order = item.Order ? item.Order + 1 : 1;
     if (parentId != null) {
+       
         order = item.Order ? item.Order + 1 : 1;
     }
     $('#newName').val('new segment');
@@ -1252,7 +1260,7 @@ function openAddSegmentChildModal(item) {
     //  $('#newParent').attr("disable", false)
 
     const parentId = item.PkWheelId || null;
-    let order = item.Order ? item.Order - 1 : 1;
+    let order =  1;
 
 
     $('#newName').val('new segment');
